@@ -1,6 +1,9 @@
 variable "scalr_aws_secret_key" {}
 variable "scalr_aws_access_key" {}
 
+variable mysql_password {}
+variable root_password {}
+
 variable "cluster_name" {
   type    = string
   description = "Cluster to deploy to"

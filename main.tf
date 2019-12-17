@@ -1,7 +1,7 @@
 terraform {
   backend "remote" {
     hostname = "my.scalr.com"
-    organization = "xxxxxxxxxxxxxxx"
+    organization = "org-sfgari365m7sck0"
     workspaces {
       name = "drupal-eks"
     }
@@ -29,6 +29,26 @@ provider "kubernetes" {
   load_config_file       = false
 }
 
+resource "kubernetes_secret" "mysql" {
+  metadata {
+    name = "mysql-pass"
+  }
+
+  data = {
+    password = var.mysql_password
+  }
+}
+
+resource "kubernetes_secret" "root" {
+  metadata {
+    name = "root-pass"
+  }
+
+  data = {
+    password = var.root_password
+  }
+}
+
 resource "kubernetes_pod" "this_pod" {
   metadata {
     name = "${var.service_name}-pod"
@@ -42,6 +62,36 @@ resource "kubernetes_pod" "this_pod" {
       name  = "${var.service_name}-ct"
       port {
         container_port = 80
+      }
+      env {
+        name = "MYSQL_DATABASE"
+        value = "drupal"
+      }
+      env {
+        name = "MYSQL_USER"
+        value = "drupal"
+      }
+      env {
+        name  = "MYSQL_ROOT_HOST"
+        value = aws_db_instance.default.endpoint
+      }
+      env {
+        name  = "MYSQL_PASSWORD"
+        value_from {
+          secret_key_ref {
+            name = kubernetes_secret.mysql.metadata[0].name
+            key  = "password"
+          }
+        }
+      }
+      env {
+        name  = "MYSQL_ROOT_PASSWORD"
+        value_from {
+          secret_key_ref {
+            name = kubernetes_secret.root.metadata[0].name
+            key  = "password"
+          }
+        }
       }
     }
   }
