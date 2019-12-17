@@ -1,6 +1,6 @@
-# Wordpress POD in EKS cluster
+# Drupal POD in EKS cluster
 
-Creates a Wordpress Pod in an EKS Cluster in the given Region.
+Creates a Drupal Pod in an EKS Cluster in the given Region.
 
 User can choose:
 
