@@ -1,7 +1,7 @@
 # Create and RDS Instance for Drupal
 
 resource "aws_db_subnet_group" "default" {
-  name       = "main"
+  name       = "main-${random_string.random.result}"
   subnet_ids = "${data.aws_eks_cluster.this.vpc_config.0.subnet_ids}"
 
   tags = {

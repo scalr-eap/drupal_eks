@@ -9,8 +9,6 @@ terraform {
 }
 
 provider "aws" {
-    access_key = "${var.scalr_aws_access_key}"
-    secret_key = "${var.scalr_aws_secret_key}"
     region     = var.region
 }
 
@@ -29,9 +27,18 @@ provider "kubernetes" {
   load_config_file       = false
 }
 
+# For randomizing names
+
+resource "random_string" "random" {
+  length = 6
+  special = false
+  upper = false
+  number = false
+}
+
 resource "kubernetes_secret" "mysql" {
   metadata {
-    name = "mysql-pass"
+    name = "mysql-pass-${random_string.random.result}"
   }
 
   data = {
@@ -41,7 +48,7 @@ resource "kubernetes_secret" "mysql" {
 
 resource "kubernetes_secret" "root" {
   metadata {
-    name = "root-pass"
+    name = "root-pass-${random_string.random.result}"
   }
 
   data = {
@@ -51,15 +58,15 @@ resource "kubernetes_secret" "root" {
 
 resource "kubernetes_pod" "this_pod" {
   metadata {
-    name = "${var.service_name}-pod"
+    name = "${var.service_name}-${random_string.random.result}"
     labels = {
-      App = "${var.service_name}-pod"
+      App = "${var.service_name}-${random_string.random.result}"
     }
   }
   spec {
     container {
       image = "drupal"
-      name  = "${var.service_name}-ct"
+      name  = "${var.service_name}-${random_string.random.result}"
       port {
         container_port = 80
       }
